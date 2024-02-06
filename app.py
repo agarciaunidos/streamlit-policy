@@ -14,31 +14,52 @@
 
 import streamlit as st
 from streamlit.logger import get_logger
-from llm_bedrock import retrieval_answer
+from llm_bedrock import retrieval_answer,update_memory
+from datetime import datetime, timedelta
+import boto3
+
+# Initialize DynamoDB for chat history
+
 
 LOGGER = get_logger(__name__)
+# Establece el rango de años permitidos
+min_year = 2000
+max_year = 2024
 
+# Convierte los años en objetos datetime para el valor inicial y final
+start_date = datetime(min_year, 1, 1)  # 1 de enero del año mínimo
+end_date = datetime(max_year, 12, 31)  
 
 def run():
-  st.title("Education AI Program")
-  st.caption("A Digital Services - Education Project")
+  st.title("Policy Document Assistant")
+  st.caption("A Digital Services Project")
 
   if "messages" not in st.session_state:
-      st.session_state["messages"] = [{"role": "assistant", "content": "Ask your query..."}]
+      st.session_state["messages"] = [{"role": "assistant", "content": "Input your query"}]
 
   for msg in st.session_state.messages:
       st.chat_message(msg["role"]).write(msg["content"])
 
 
   with st.sidebar:
-      llm_model = st.selectbox("Select LLM", ["Anthropic Claude V2","GPT-4-1106-preview"])
-      vector_store = st.selectbox("Select Vector DB", ["Pinecone: Highschool democracy", "Pinecone: University of Arizona"])
+      st.sidebar.title("Select Document Type")
+      type = st.sidebar.selectbox("type",["ALL","Article"])
+      st.sidebar.title("Select Time Period")
+      selected_years = st.sidebar.slider("Year", min_value=min_year, max_value=max_year, value=(2012, 2018), step=1, format="%d")
 
   if prompt := st.chat_input():
       if len(prompt) > 0:
           st.info("Your Query: " + prompt)
-          answer = retrieval_answer(prompt, llm_model,vector_store)
-          st.success(answer)
+          answer,metadata = retrieval_answer(prompt,selected_years)
+          #st.dataframe(answer)
+          #st.markdown(answer)
+          st.subheader('Answer:')
+          st.write(answer)
+          st.subheader('Document Metadata:')
+          #st.json(metadata)
+          st.dataframe(metadata)
+          #result = update_memory(prompt, answer)
+          #st.write(result)
       else:
           st.error("Please enter a query.")
 
