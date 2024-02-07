@@ -11,6 +11,7 @@ from langchain.retrievers import AmazonKendraRetriever
 from langchain_core.prompts import ChatPromptTemplate
 from langchain.chains import create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain.memory import DynamoDBChatMessageHistory
 from langchain.llms.bedrock import Bedrock
 import boto3
 import toml
@@ -21,8 +22,15 @@ PINECONE_ENV = st.secrets.PINECONE_ENV
 bedrock_region = st.secrets.AWS_BEDROCK_REGION
 max_tokens = 1024  # Adjust as needed
 temperature = 0.7  # Adjust as needed
+max_tokens = 1024  # Adjust as needed
+temperature = 0.7  # Adjust as needed
+
+session = boto3.Session(region_name='us-east-1')
 bedrock_client = boto3.client("bedrock-runtime", region_name="us-east-1")
+chat_history_DB = DynamoDBChatMessageHistory(table_name="SessionTable", session_id="993", boto3_session=session)
+
 index_pinecone  = 'unidosus-policy-test'
+
 model_id = "anthropic.claude-v2:1"
 model_kwargs = {"max_tokens_to_sample": max_tokens, "temperature": temperature}
 embeddings = BedrockEmbeddings(client=bedrock_client, region_name="us-east-1")
@@ -45,15 +53,6 @@ def process_llm_response(llm_response):
     for source in llm_response["source_documents"]:
         print(source.metadata['source'])
 
-template_old = """"Answer the following question based only on the provided context:
-
-<context>
-{context}
-</context>
-
-Question: {input}
-"""
-
 
 template = """"Based on the context provided from the vector database, please perform the action as per the user's request:
 
@@ -71,8 +70,7 @@ prompt = ChatPromptTemplate.from_template(template)
 document_chain = create_stuff_documents_chain(llm, prompt)
 
 # Function to retrieve answers
-def retrieval_answer(query, selected_years ):        
-    #filter_condition = {"page": {"$eq": 1}}
+def retrieval_answer(query, selected_years,types ):        
     filter_condition_year = {
     "year": {
         "$gte": selected_years[0],  # Mayor o igual al año de inicio
@@ -88,9 +86,30 @@ def retrieval_answer(query, selected_years ):
     response = retrieval_chain.invoke({"input": f"{query}"})
     sources = render_search_results(response['context'])
     chat_history_DB.add_user_message(query)
-    chat_history_DB.add_ai_message(response['answer'])
+    ai_message = extract_answer_sources(response)
+    chat_history_DB.add_ai_message(ai_message)
     return response['answer'], sources 
 
+def create_filter_conditions(selected_years, types):
+    # Condición de filtro inicial para los años
+    filter_conditions = {
+        "year": {
+            "$gte": selected_years[0],  # Mayor o igual al año de inicio
+            "$lte": selected_years[1]   # Menor o igual al año de finalización
+        }
+    }
+    return filter_conditions
+"""   
+    # Manejar el filtro de tipo según el valor de entrada
+    if types and types != ["ALL"]:  # Si 'types' no está vacío y es diferente de ["ALL"]
+        if len(types) == 1:  # Si 'types' contiene un solo elemento
+            # Agregar filtro para un solo tipo
+            filter_conditions["type"] = {"$eq": types[0]}
+        else:  # Si 'types' contiene múltiples elementos
+            # Agregar filtro para múltiples tipos usando '$in'
+            filter_conditions["type"] = {"$in": types}
+"""    
+    
 
 def render_search_results(documents):
     # Initialize a list to hold metadata dictionaries
@@ -115,21 +134,26 @@ def render_search_results(documents):
     return df
 
 
-from langchain.memory import DynamoDBChatMessageHistory
-session = boto3.Session(region_name='us-east-1')
+def extract_answer_sources(data):
+    # Extract the answer from the input data
+    answer = data.get('answer', '')
 
-bedrock_client = boto3.client("bedrock-runtime", region_name="us-east-1")
-chat_history_DB = DynamoDBChatMessageHistory(table_name="SessionTable", session_id="991", boto3_session=session)
+    # Initialize a list to hold the sources
+    sources = []
 
-def update_memory(human_input, ai_output):
-    """
-    Update the global memory with new conversation turns.
-    """
-    #chat_history_DB.save_context({'input': human_input}, {'output': ai_output})
-    chat_history_DB.add_user_message(human_input)
-    chat_history_DB.add_ai_message(ai_output)
+    # Extract the sources from the context metadata
+    for document in data.get('context', []):
+        # Adjusted to access attributes of a Document object
+        # Assuming document.metadata['source'] can be accessed directly
+        # Replace with the correct method of accessing the source if necessary
+        source = document.metadata['source'] if hasattr(document, 'metadata') else ''
+        if source:  # Check if the source is not an empty string
+            sources.append(source)
 
-    return "Memory updated"
+    # Join the sources into a single string separated by commas
+    sources_str = "','".join(sources)
 
+    # Concatenate the answer and the sources string
+    result = f"{answer}source:'{sources_str}'."
 
-
+    return result

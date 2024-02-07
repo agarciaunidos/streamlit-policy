@@ -14,7 +14,7 @@
 
 import streamlit as st
 from streamlit.logger import get_logger
-from llm_bedrock import retrieval_answer,update_memory
+from llm_bedrock import retrieval_answer
 from datetime import datetime, timedelta
 import boto3
 
@@ -22,12 +22,13 @@ import boto3
 
 
 LOGGER = get_logger(__name__)
-# Establece el rango de años permitidos
+# 
 min_year = 2000
 max_year = 2024
 
-# Convierte los años en objetos datetime para el valor inicial y final
-start_date = datetime(min_year, 1, 1)  # 1 de enero del año mínimo
+options = ['ALL','Fact Sheet','Article','Letter','Research Report','Testimony','Regulatory Comment','Book','Spanish Publication','Other']
+#
+start_date = datetime(min_year, 1, 1)  #
 end_date = datetime(max_year, 12, 31)  
 
 def run():
@@ -40,26 +41,24 @@ def run():
   for msg in st.session_state.messages:
       st.chat_message(msg["role"]).write(msg["content"])
 
-
   with st.sidebar:
-      st.sidebar.title("Select Document Type")
-      type = st.sidebar.selectbox("type",["ALL","Article"])
       st.sidebar.title("Select Time Period")
       selected_years = st.sidebar.slider("Year", min_value=min_year, max_value=max_year, value=(2012, 2018), step=1, format="%d")
+      st.sidebar.title("Select Document Type")
+      types = st.sidebar.multiselect('Select Type:', options)
 
   if prompt := st.chat_input():
       if len(prompt) > 0:
           st.info("Your Query: " + prompt)
-          answer,metadata = retrieval_answer(prompt,selected_years)
+          answer,metadata = retrieval_answer(prompt,selected_years,types)
           #st.dataframe(answer)
           #st.markdown(answer)
           st.subheader('Answer:')
           st.write(answer)
           st.subheader('Document Metadata:')
-          #st.json(metadata)
           st.dataframe(metadata)
-          #result = update_memory(prompt, answer)
-          #st.write(result)
+          st.write(types)
+
       else:
           st.error("Please enter a query.")
 
