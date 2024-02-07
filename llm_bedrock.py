@@ -19,7 +19,7 @@ import toml
 
 PINECONE_API_KEY = st.secrets.PINECONE_API_KEY
 PINECONE_ENV = st.secrets.PINECONE_ENV
-bedrock_region = st.secrets.AWS_BEDROCK_REGION
+bedrock_region = st.secrets.AWS_DEFAULT_REGION
 max_tokens = 1024  # Adjust as needed
 temperature = 0.7  # Adjust as needed
 max_tokens = 1024  # Adjust as needed
