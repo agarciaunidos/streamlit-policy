@@ -15,6 +15,7 @@ from langchain.memory import DynamoDBChatMessageHistory
 from langchain.llms.bedrock import Bedrock
 import boto3
 import toml
+import pandas as pd
 
 
 PINECONE_API_KEY = st.secrets.PINECONE_API_KEY
