@@ -44,7 +44,10 @@ def retrieval_answer(query, selected_years, types):
     vectorstore = Pinecone(index, embeddings, "text")
     retriever = vectorstore.as_retriever(search_kwargs={'filter': filter_conditions, 'k': 20})
     retrieval_chain = create_retrieval_chain(retriever, document_chain)
-    response = retrieval_chain.invoke({"input": f"{query}"})
+    # Include filter conditions in the prompt for enhanced context
+    # Enhance the query with filter details
+    filter_details = f"Applying filters: Years between {selected_years[0]} and {selected_years[1]}, Types: {', '.join(types) if types else 'All types'}"
+    response = retrieval_chain.invoke({"input": f"{query}", "filter": f"{filter_details}"})
     sources = render_search_results(response['context'])
     # Update chat history in DynamoDB
     chat_history_DB.add_user_message(query)
@@ -92,11 +95,36 @@ def extract_answer_sources(data):
     return result
 
 # Define the prompt template for user queries
-template = """Based on the context provided from the vector database, please perform the action as per the user's request:
-<context>{context}</context>
-Depending on the user's request, please:
-- If the user asks for relevant documents on a specific topic, retrieve and display documents from the database that are pertinent to the topic.
-- If the user requests a summary on a specific topic, provide a concise summary of the relevant information on the topic from the database.
-User's Request: {input}"""
-prompt = ChatPromptTemplate.from_template(template)
+PROMPT_TEMPLATE = """
+    Answer the following questions as best you can but speaking as assistant expert in summarization and gathering ideas.
+    You have access to a vector database where are storage UnidosUS documents, and the user applied the following filters:
+
+    {filter}
+
+    Use the following format:
+
+    Query:
+        the input query you must answer.
+    Thought:
+        you should always think about what to do, based on what the user is asking.
+    Action:
+        the action to take, should be to use this context from Vector Database, Remember the user may applied filters on it:
+<context>{context}</context>.
+    Action Input:
+        Vector database context.
+    Observation:
+        the result of the action
+    ... (this Thought/Action/Action Input/Observation can repeat up to 3 times)
+    Thought:
+        I now know the final answer.
+    Final Answer:
+        The answer should be comprehensive and add the more possible detail Based on the limited excerpt provided you may get.
+
+    Do not make up any answer!
+    JUST RESPONSE THE ANSWER!, DO NOT INCLUDE query,thought,action, etc.....
+    User's Request: {input} 
+    """
+
+prompt = ChatPromptTemplate.from_template(PROMPT_TEMPLATE)
 document_chain = create_stuff_documents_chain(llm, prompt)
+
