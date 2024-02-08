@@ -1,4 +1,5 @@
 
+import streamlit as st
 import pandas as pd
 import pinecone
 from langchain_community.vectorstores import Pinecone
@@ -9,7 +10,6 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain.chains import create_retrieval_chain
 from langchain.memory import DynamoDBChatMessageHistory
 import boto3
-
 
 PINECONE_API_KEY = st.secrets.PINECONE_API_KEY
 BEDROCK_REGION = st.secrets.AWS_DEFAULT_REGION
