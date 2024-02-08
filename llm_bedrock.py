@@ -1,7 +1,6 @@
 
 import pandas as pd
 import pinecone
-from dotenv import load_dotenv
 from langchain_community.vectorstores import Pinecone
 from langchain_community.embeddings import BedrockEmbeddings
 from langchain.llms.bedrock import Bedrock
