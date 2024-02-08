@@ -13,55 +13,51 @@
 # limitations under the License.
 
 import streamlit as st
-from streamlit.logger import get_logger
+from datetime import datetime
 from llm_bedrock import retrieval_answer
-from datetime import datetime, timedelta
-import boto3
 
-# Initialize DynamoDB for chat history
-
-
-LOGGER = get_logger(__name__)
-# 
-min_year = 2000
-max_year = 2024
-
-options = ['ALL','Fact Sheet','Article','Letter','Research Report','Testimony','Regulatory Comment','Book','Spanish Publication','Other']
-#
-start_date = datetime(min_year, 1, 1)  #
-end_date = datetime(max_year, 12, 31)  
+# Constants for date range and document options
+MIN_YEAR = 2000
+MAX_YEAR = 2024
+DOCUMENT_TYPES = ['ALL', 'Fact Sheet', 'Article', 'Letter', 'Research Report', 'Appeal Letter', 'Book', 'Other']
 
 def run():
-  st.title("Policy Document Assistant")
-  st.caption("A Digital Services Project")
+    # Display the application title and caption
+    st.title("Policy Document Assistant")
+    st.caption("A Digital Services Project")
 
-  if "messages" not in st.session_state:
-      st.session_state["messages"] = [{"role": "assistant", "content": "Input your query"}]
+    # Initialize session state for chat messages if not already present
+    st.session_state["messages"] = [{"role": "user", "content": "UUS Assistant"}]
 
-  for msg in st.session_state.messages:
-      st.chat_message(msg["role"]).write(msg["content"])
+    # Display chat messages from session state
+    for msg in st.session_state.messages:
+        st.chat_message(msg["role"]).write(msg["content"])
 
-  with st.sidebar:
-      st.sidebar.title("Select Time Period")
-      selected_years = st.sidebar.slider("Year", min_value=min_year, max_value=max_year, value=(2012, 2018), step=1, format="%d")
-      st.sidebar.title("Select Document Type")
-      types = st.sidebar.multiselect('Select Type:', options)
+    # Sidebar for filtering documents by time period and type
+    with st.sidebar:
+        st.title("Select Time Period")
+        selected_years = st.slider("Year", min_value=MIN_YEAR, max_value=MAX_YEAR, value=(2012, 2018), step=1, format="%d")
+        st.title("Select Document Type")
+        selected_types = st.multiselect('Select Type:', DOCUMENT_TYPES)
 
-  if prompt := st.chat_input():
-      if len(prompt) > 0:
-          st.info("Your Query: " + prompt)
-          answer,metadata = retrieval_answer(prompt,selected_years,types)
-          #st.dataframe(answer)
-          #st.markdown(answer)
-          st.subheader('Answer:')
-          st.write(answer)
-          st.subheader('Document Metadata:')
-          st.dataframe(metadata)
-          st.write(types)
-
-      else:
-          st.error("Please enter a query.")
-
+    # Input field for user queries
+    prompt = st.chat_input()
+    if prompt and len(prompt) > 0:
+        st.info("Your Input: " + prompt)
+        # Retrieve answer and metadata based on the user's query, selected years, and document types
+        answer, metadata = retrieval_answer(prompt, selected_years, selected_types)
+        st.subheader('Answer:')
+        st.write(answer)
+        st.subheader('Sources:')
+        st.data_editor(
+            metadata,
+            column_config={
+                "Source": st.column_config.LinkColumn("Source")
+            },
+            hide_index=True,
+            )
+    else:
+        st.error("Please enter a query.")
 
 if __name__ == "__main__":
     run()
