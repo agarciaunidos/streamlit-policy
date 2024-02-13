@@ -19,7 +19,7 @@ from llm_bedrock import retrieval_answer
 # Constants for date range and document options
 MIN_YEAR = 2000
 MAX_YEAR = 2024
-DOCUMENT_TYPES = ['ALL', 'Fact Sheet', 'Article', 'Letter', 'Research Report', 'Appeal Letter', 'Book', 'Other']
+DOCUMENT_TYPES = ['ALL', 'Annual Report','Fact Sheet', 'Article', 'Letter', 'Research Report', 'Appeal Letter', 'Book', 'Other']
 
 def run():
     # Display the application title and caption
