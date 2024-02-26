@@ -40,13 +40,13 @@ def run():
         selected_years = st.slider("Year", min_value=MIN_YEAR, max_value=MAX_YEAR, value=(2012, 2018), step=1, format="%d")
         st.title("Select Document Type")
         selected_types = st.multiselect('Select Type:', DOCUMENT_TYPES)
-        st.title('Ajuste de Tokens de Salida del LLM')
+        """
         st.sidebar.title("Output tokens")
         if 'num_tokens' not in st.session_state:
             st.session_state['num_tokens'] = 1000  #initial set 
         num_tokens = st.sidebar.slider('Output tokens number', min_value=1000, max_value=50000, value=st.session_state['num_tokens'], key='slider')
         st.session_state['num_tokens'] = num_tokens
-
+        """
     # Input field for user queries
     prompt = st.chat_input()
     if prompt and len(prompt) > 0:
