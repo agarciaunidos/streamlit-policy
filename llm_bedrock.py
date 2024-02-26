@@ -34,7 +34,7 @@ def pinecone_db():
     index = pc.Index(index_pinecone)
     return index
 
-def retrieval_answer(query, selected_years, types, max_tokens_output):
+def retrieval_answer(query, selected_years, types):
     """
     Retrieves answers and sources based on the query, selected years, and document types.
     """
@@ -47,7 +47,7 @@ def retrieval_answer(query, selected_years, types, max_tokens_output):
     # Include filter conditions in the prompt for enhanced context
     # Enhance the query with filter details
     filter_details = f"Applying filters: Years between {selected_years[0]} and {selected_years[1]}, Types: {', '.join(types) if types else 'All types'}"
-    response = retrieval_chain.invoke({"input": f"{query}", "filter": f"{filter_details}", "tokens": f"{max_tokens_output}"})
+    response = retrieval_chain.invoke({"input": f"{query}", "filter": f"{filter_details}", "tokens": f"{max_tokens}"})
     sources = render_search_results(response['context'])
     # Update chat history in DynamoDB
     chat_history_DB.add_user_message(query)
