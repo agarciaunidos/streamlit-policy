@@ -52,7 +52,7 @@ def run():
     if prompt and len(prompt) > 0:
         st.info("Your Input: " + prompt)
         # Retrieve answer and metadata based on the user's query, selected years, and document types
-        answer, metadata = retrieval_answer(prompt, selected_years, selected_types)
+        answer, metadata = retrieval_answer(prompt, selected_years, selected_types , st.session_state['num_tokens'])
         st.subheader('Answer:')
         st.write(answer)
         st.subheader('Sources:')
