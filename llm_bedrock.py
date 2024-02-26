@@ -14,7 +14,7 @@ import boto3
 PINECONE_API_KEY = st.secrets.PINECONE_API_KEY
 BEDROCK_REGION = st.secrets.AWS_DEFAULT_REGION
 #max_tokens = st.session_state['num_tokens']
-max_tokens = 1000
+max_tokens = 50000
 TEMPERATURE = 0.7
 
 # Initialize clients and services
