@@ -9,7 +9,15 @@ from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.prompts import ChatPromptTemplate
 from langchain.chains import create_retrieval_chain
 from langchain.memory import DynamoDBChatMessageHistory
+import os
 import boto3
+from langsmith import Client
+
+os.environ["LANGCHAIN_TRACING_V2"] =  "true"
+os.environ["LANGCHAIN_ENDPOINT"] = "https://api.smith.langchain.com"
+os.environ["LANGCHAIN_API_KEY"] =  "ls__4c8f48ddf73c4061920e773c8684f3b5"
+os.environ["LANGCHAIN_PROJECT"] = "Policy App v1"
+client = Client()
 
 PINECONE_API_KEY = st.secrets.PINECONE_API_KEY
 BEDROCK_REGION = st.secrets.AWS_DEFAULT_REGION
