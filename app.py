@@ -74,14 +74,15 @@ def run():
             },
             hide_index=True,
             )
-    else:
-        st.error("Please enter a query.")
-    with st.form('form'):
+        with st.form('form'):
             streamlit_feedback(feedback_type="thumbs",
                                 optional_text_label="Enter your feedback here", 
                                 align="flex-start", 
                                 key='fb_k')
             st.form_submit_button('Save feedback', on_click=handle_feedback)
+    else:
+        st.error("Please enter a query.")
+
 
 if __name__ == "__main__":
     run()
