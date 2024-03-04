@@ -13,10 +13,10 @@ import os
 import boto3
 from langsmith import Client
 
-os.environ["LANGCHAIN_TRACING_V2"] =  "true"
-os.environ["LANGCHAIN_ENDPOINT"] = "https://api.smith.langchain.com"
-os.environ["LANGCHAIN_API_KEY"] =  "ls__4c8f48ddf73c4061920e773c8684f3b5"
-os.environ["LANGCHAIN_PROJECT"] = "Policy App v1"
+os.environ["LANGCHAIN_TRACING_V2"] =  st.secrets.LANGCHAIN_TRACING_V2
+os.environ["LANGCHAIN_ENDPOINT"] = st.secrets.LANGCHAIN_ENDPOINT
+os.environ["LANGCHAIN_API_KEY"] =  st.secrets.LANGCHAIN_API_KEY
+os.environ["LANGCHAIN_PROJECT"] = st.secrets.LANGCHAIN_PROJECT
 client = Client()
 
 PINECONE_API_KEY = st.secrets.PINECONE_API_KEY
