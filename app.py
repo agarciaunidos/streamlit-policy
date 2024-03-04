@@ -15,6 +15,7 @@
 import streamlit as st
 from datetime import datetime
 from llm_bedrock import retrieval_answer
+from streamlit_feedback import streamlit_feedback
 
 # Constants for date range and document options
 MIN_YEAR = 2000
@@ -62,6 +63,12 @@ def run():
             )
     else:
         st.error("Please enter a query.")
+    with st.form('form'):
+            streamlit_feedback(feedback_type="thumbs",
+                                optional_text_label="Enter your feedback here", 
+                                align="flex-start", 
+                                key='fb_k')
+            st.form_submit_button('Save feedback', on_click=handle_feedback)
 
 if __name__ == "__main__":
     run()
