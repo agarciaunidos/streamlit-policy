@@ -55,7 +55,8 @@ def run():
         selected_years = st.slider("Year", min_value=MIN_YEAR, max_value=MAX_YEAR, value=(2012, 2018), step=1, format="%d")
         st.title("Select Document Type")
         selected_types = st.multiselect('Select Type:', DOCUMENT_TYPES)
-        user_input = st.text_input("Why are you using the tool?", "")
+        st.title("Purpose of using AI tool")
+        user_input = st.text_input("What is the purpose of using this tool?", "")
         if st.button("Submit"):
             st.write(f": {user_input}")
     # Input field for user queries
