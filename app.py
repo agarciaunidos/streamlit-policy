@@ -44,9 +44,6 @@ def run():
         user_input = st.text_input("Why are you using the tool?", "")
         if st.button("Submit"):
             st.write(f": {user_input}")
-        else:
-            st.write("...")
-
     # Input field for user queries
     prompt = st.chat_input()
     if prompt and len(prompt) > 0:
