@@ -1,89 +1,23 @@
-# Copyright (c) Streamlit Inc. (2018-2022) Snowflake Inc. (2022)
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 import streamlit as st
-from datetime import datetime
-from llm_bedrock import retrieval_answer
-from streamlit_feedback import streamlit_feedback
+# Asegúrate de que tus otros archivos no importen app.py de ninguna manera
 
-def handle_feedback():  
-    st.write(st.session_state.fb_k)
-    st.toast("✔️ Feedback received!")
-if "df" in st.session_state:
-    if prompt := st.chat_input(placeholder=""):
-       ...
-       with st.form('form'):
-            streamlit_feedback(feedback_type="thumbs",
-                                optional_text_label="Enter your feedback here", 
-                                align="flex-start", 
-                                key='fb_k')
-            st.form_submit_button('Save feedback', on_click=handle_feedback)
+# Define las funciones de navegación o importa las funciones de otros archivos aquí
+def load_policy_app():
+    from policy_app import main as policy_main
+    policy_main()
 
-# Constants for date range and document options
-MIN_YEAR = 2000
-MAX_YEAR = 2024
-DOCUMENT_TYPES = ['ALL', 'Annual Report','Fact Sheet', 'Article', 'Letter', 'Research Report', 'Appeal Letter', 'Book', 'Other']
+def load_db_app():
+    from app_dy import main as db_app
+    db_app()
 
-def run():
-    # Display the application title and caption
-    st.title("Policy Document Assistant")
-    st.caption("A Digital Services Project")
+# Sidebar para la navegación
+    
 
-    # Initialize session state for chat messages if not already present
-    st.session_state["messages"] = [{"role": "user", "content": "UUS Assistant"}]
+st.sidebar.image('https://unidosus.org/wp-content/themes/unidos/images/unidosus-logo-color-2x.png', use_column_width=True)
+st.sidebar.title("Navigation")
+pagina = st.sidebar.selectbox("Select a page:", ["Policy App", "Chat History"])
 
-    # Display chat messages from session state
-    for msg in st.session_state.messages:
-        st.chat_message(msg["role"]).write(msg["content"])
-
-    # Sidebar for filtering documents by time period and type
-    with st.sidebar:
-        st.image('https://unidosus.org/wp-content/themes/unidos/images/unidosus-logo-color-2x.png', use_column_width=True)
-
-        st.title("Select Time Period")
-        selected_years = st.slider("Year", min_value=MIN_YEAR, max_value=MAX_YEAR, value=(2012, 2018), step=1, format="%d")
-        st.title("Select Document Type")
-        selected_types = st.multiselect('Select Type:', DOCUMENT_TYPES)
-        st.title("Purpose of using AI tool")
-        user_input = st.text_input("What is the purpose of using this tool?", "")
-        if st.button("Submit"):
-            st.write(f": {user_input}")
-    # Input field for user queries
-    prompt = st.chat_input()
-    if prompt and len(prompt) > 0:
-        st.info("Your Input: " + prompt)
-        # Retrieve answer and metadata based on the user's query, selected years, and document types
-        answer, metadata = retrieval_answer(prompt, selected_years, selected_types)
-        st.subheader('Answer:')
-        st.write(answer)
-        st.subheader('Sources:')
-        st.data_editor(
-            metadata,
-            column_config={
-                "Source": st.column_config.LinkColumn("Source")
-            },
-            hide_index=True,
-            )
-        with st.form('form'):
-            streamlit_feedback(feedback_type="thumbs",
-                                optional_text_label="Enter your feedback here", 
-                                align="flex-start", 
-                                key='fb_k')
-            st.form_submit_button('Save feedback', on_click=handle_feedback)
-    else:
-        st.error("Please enter a query.")
-
-
-if __name__ == "__main__":
-    run()
+if pagina == "Policy App":
+    load_policy_app()
+elif pagina == "Chat History":
+    load_db_app()
