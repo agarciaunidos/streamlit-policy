@@ -17,7 +17,8 @@ def main():
         response = table.scan(
             ProjectionExpression="SessionId"
         )
-        session_ids = [item['SessionId'] for item in response['Items']]
+        #session_ids = [item['SessionId'] for item in response['Items']]
+        session_ids = ['1','2']
         return session_ids
 
     def fetch_chat_history(session_id):
@@ -36,7 +37,7 @@ def main():
     # UI
     st.sidebar.title("Session IDs")
     session_ids = fetch_session_ids()
-    selected_session_id = st.sidebar.selectbox("Elige un Session ID:", session_ids)
+    selected_session_id = st.sidebar.selectbox("Select a Session ID:", session_ids)
 
     if selected_session_id:
         chat_history = fetch_chat_history(selected_session_id)
