@@ -61,7 +61,7 @@ def retrieval_answer(query, selected_years, types):
     # Update chat history in DynamoDB
     chat_history_DB.add_user_message(query)
     ai_message = extract_answer_sources(response)
-    chat_history_DB.add_ai_message(ai_message)
+    chat_history_DB.add_ai_message(response['answer'])
     return response['answer'], sources
 
 def create_filter_conditions(selected_years, options=None):
