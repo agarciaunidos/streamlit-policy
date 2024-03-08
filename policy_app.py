@@ -49,7 +49,7 @@ def main():
 
     # Sidebar for filtering documents by time period and type
     with st.sidebar:
-        st.image('https://unidosus.org/wp-content/themes/unidos/images/unidosus-logo-color-2x.png', use_column_width=True)
+        #st.image('https://unidosus.org/wp-content/themes/unidos/images/unidosus-logo-color-2x.png', use_column_width=True)
 
         st.title("Select Time Period")
         selected_years = st.slider("Year", min_value=MIN_YEAR, max_value=MAX_YEAR, value=(2012, 2018), step=1, format="%d")
